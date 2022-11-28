@@ -82,7 +82,9 @@ export default function Home(props) {
 }
 
 export async function getServerSideProps() {
-  let response = await fetch("http://localhost:3000/api/invoices");
+  let response = await fetch(
+    "https://invoice-delta-gules.vercel.app/api/invoices"
+  );
   // extract the data
   let invoices = await response.json();
 

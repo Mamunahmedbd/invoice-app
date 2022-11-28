@@ -341,7 +341,9 @@ export async function getServerSideProps(context) {
   // console.log(context);
   const { id } = context.params;
 
-  let response = await fetch(`http://localhost:3000/api/edit/${id}`);
+  let response = await fetch(
+    `https://invoice-delta-gules.vercel.app/api/edit/${id}`
+  );
   // extract the data
   let invoice = await response.json();
 

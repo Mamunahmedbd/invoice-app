@@ -234,7 +234,9 @@ export default InvoiceDetails;
 export async function getServerSideProps(context) {
   const { invoiceId } = context.params;
 
-  let response = await fetch(`http://localhost:3000/api/invoices/${invoiceId}`);
+  let response = await fetch(
+    `https://invoice-delta-gules.vercel.app/api/invoices/${invoiceId}`
+  );
   // extract the data
   let invoice = await response.json();
 
