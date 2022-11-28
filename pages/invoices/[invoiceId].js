@@ -235,7 +235,7 @@ export async function getServerSideProps(context) {
   const { invoiceId } = context.params;
 
   let response = await fetch(
-    `https://invoice-mamunahmedbd.vercel.app/api/invoices/${invoiceId}`
+    `https://invoice-delta-gules.vercel.app/api/invoices/${invoiceId}`
   );
   // extract the data
   let invoice = await response.json();
