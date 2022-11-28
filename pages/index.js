@@ -1,8 +1,17 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import styles from "../styles/Home.module.css";
 
-export default function Home() {
+export default function Home(props) {
+  const router = useRouter();
+  const { data } = props;
+  console.log(data);
+
+  const navigatePage = () => router.push("/add-to-invoice");
+  // total amount of all product items
+  const totalAmount = data?.reduce((acc, curr) => acc + curr.total, 0);
   return (
     <div className={styles.container}>
       <Head>
@@ -11,59 +20,104 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+      <div className="main__container">
+        <div className="invoice__header">
+          <div className="invoice__header-logo">
+            <h3>Invoices</h3>
+            <p>There are total {data?.length} invoices</p>
+          </div>
+          <div className="invoice__header-logo">
+            <h3>Total Amount</h3>
+            <p>Total ${totalAmount} of all invoices</p>
+          </div>
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+          <button className="btn" onClick={navigatePage}>
+            Add New
+          </button>
         </div>
-      </main>
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
+        <div className="invoice__container">
+          {/* ======= invoice item =========== */}
+          {data?.map((invoice) => (
+            <Link href={`/invoices/${invoice.id}`} passRef key={invoice.id}>
+              <div className="invoice__item">
+                <div>
+                  <h5 className="invoice__id">
+                    {invoice.id.substr(0, 6).toUpperCase()}
+                  </h5>
+                </div>
+
+                <div>
+                  <h6 className="invoice__client">{invoice.clientName}</h6>
+                </div>
+
+                <div>
+                  <p className="invoice__created">{invoice.createdAt}</p>
+                </div>
+
+                <div>
+                  <h3 className="invoice__total">${invoice.total}</h3>
+                </div>
+
+                <div>
+                  <button
+                    className={`${
+                      invoice.status === "paid"
+                        ? "paid__status"
+                        : invoice.status === "pending"
+                        ? "pending__status"
+                        : "draft__status"
+                    }`}
+                  >
+                    {invoice.status}
+                  </button>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
     </div>
-  )
+  );
 }
+
+export async function getServerSideProps() {
+  let response = await fetch("http://localhost:3000/api/invoices");
+  // extract the data
+  let invoices = await response.json();
+
+  return {
+    props: {
+      data: invoices.map((invoice) => {
+        return {
+          id: invoice._id,
+          clientName: invoice.clientName,
+          createdAt: invoice.createdAt,
+          total: invoice.total,
+          status: invoice.status,
+        };
+      }),
+    },
+    // revalidate: 1,
+  };
+}
+// export async function getStaticProps() {
+//   let response = await fetch("http://localhost:3000/api/invoices");
+//   // extract the data
+//   let invoices = await response.json();
+
+//   return {
+//     props: {
+//       data: invoices.map((invoice) => {
+//         return {
+//           id: invoice._id,
+//           clientName: invoice.clientName,
+//           createdAt: invoice.createdAt,
+//           total: invoice.total,
+//           status: invoice.status,
+//         };
+//       }),
+//     },
+//     revalidate: 1,
+//   };
+// }
